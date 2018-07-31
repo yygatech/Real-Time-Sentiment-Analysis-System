@@ -41,4 +41,4 @@ build.log
 build.log
 
 # twitter apps authorizations
-src/main/resources/application.properties
+application.properties
