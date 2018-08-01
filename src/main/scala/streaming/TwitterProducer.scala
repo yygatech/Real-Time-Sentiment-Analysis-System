@@ -25,8 +25,9 @@ object TwitterProducer {
     // You can find all functions used to process the stream in the
     // Utils.scala source file, whose contents we import here
     import Utils._
+    import NLPUtils._
 
-      /********
+    /********
       * Let's check to make sure user has entered correct parameters
       *
       ********/
@@ -61,10 +62,10 @@ object TwitterProducer {
 
     // Let's extract the words of each tweet
     // We'll carry the tweet along in order to print it in the end
-    val textAndSentences: DStream[(TweetText, Sentence)] =
+    val textAndSentences: DStream[Double] =
     tweets.filter(x => x.getLang == "en").
       map(_.getText).
-      map(tweetText => (tweetText, wordsOf(tweetText)))
+      map(tweetText => getSentimentRating(tweetText))
 
 
     // write output to screen
@@ -82,7 +83,9 @@ object TwitterProducer {
           "org.apache.kafka.common.serialization.StringSerializer")
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
           "org.apache.kafka.common.serialization.StringSerializer")
+
         val producer = new KafkaProducer[String, String](props)
+
         partition.foreach( record => {
           val data = record.toString
           val message = new ProducerRecord[String, String](topic, null, data)

@@ -10,6 +10,7 @@ object Utils {
   type Tweet = Status
   type TweetText = String
   type Sentence = Seq[String]
+  type Sentiment = String
 
   //private def format(n: Int): String = f"$n%2d"
 
