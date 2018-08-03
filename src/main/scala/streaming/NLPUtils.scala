@@ -10,7 +10,7 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 
 object NLPUtils {
 
-  def getSentimentRating(text:String):Double = {
+  def getSentimentRating(text:String):(String, Double) = {
 
 
     //pipeline properties
@@ -35,7 +35,7 @@ object NLPUtils {
         val sentimentRating = RNNCoreAnnotations.getPredictedClass(tree)
 
         //return sentimentRating
-        sentimentRating
+        -1 + (sentimentRating.toDouble / 2)
 
         //alternatively return value {-1, 0, 1} for {negative, neutral, positive}
 //        sentimentRating match {
@@ -46,14 +46,14 @@ object NLPUtils {
       })
 
     //calculate overall sentiment
-    var sum = 0
+    var sum = 0.0
     for (sentiment <- sentiments) {
       sum = sum + sentiment
     }
 
-    val avg:Double = sum.toDouble / sentiments.size
+    val avg:Double = sum / sentiments.size
 
-    avg
+    (text, avg)
   }
 
 

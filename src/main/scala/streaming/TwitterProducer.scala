@@ -62,36 +62,48 @@ object TwitterProducer {
 
     // Let's extract the words of each tweet
     // We'll carry the tweet along in order to print it in the end
-    val textAndSentences: DStream[Double] =
+    val textAndSentences: DStream[(String, Double)] =
     tweets.filter(x => x.getLang == "en").
       map(_.getText).
       map(tweetText => getSentimentRating(tweetText))
 
 
     // write output to screen
-    textAndSentences.print()
+//    textAndSentences.print()
 
     // send data to Kafka broker
 
     textAndSentences.foreachRDD( rdd => {
 
       rdd.foreachPartition( partition => {
-        // Print statements in this section are shown in the executor's stdout logs
-        val props = new HashMap[String, Object]()
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers)
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
-          "org.apache.kafka.common.serialization.StringSerializer")
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-          "org.apache.kafka.common.serialization.StringSerializer")
 
-        val producer = new KafkaProducer[String, String](props)
+        // Print statements in this section are shown in the executor's stdout logs
+        val configs = new HashMap[String, Object]()
+        configs.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers)
+        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+          "org.apache.kafka.common.serialization.StringSerializer")
+        configs.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+          "org.apache.kafka.common.serialization.StringSerializer")
+//        configs.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,
+//          "org.apache.kafka.common.serialization.FloatSerializer")
+
+        val producer = new KafkaProducer[String, String](configs)
 
         partition.foreach( record => {
-          val data = record.toString
+
+          //print record to screen
+          println(record._1)
+          println(record._2)
+          println()
+
+          val data = record._2.toString
           val message = new ProducerRecord[String, String](topic, null, data)
           producer.send(message)
-        } )
+
+        })
+
         producer.close()
+
       })
 
     })
