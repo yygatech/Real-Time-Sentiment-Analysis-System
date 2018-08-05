@@ -11,8 +11,7 @@ import edu.stanford.nlp.sentiment.SentimentCoreAnnotations
 object NLPUtils {
 
   def getSentimentRating(text:String):(String, Double) = {
-
-
+    
     //pipeline properties
     val properties = new Properties()
     properties.setProperty("annotators", "tokenize, ssplit, parse, sentiment")
